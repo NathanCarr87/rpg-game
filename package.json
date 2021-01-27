@@ -3,6 +3,6 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "three": "^0.124.0"
+    "three": "^0.125.1"
   }
 }

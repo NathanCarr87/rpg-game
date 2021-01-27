@@ -1,7 +1,8 @@
 // Import stylesheets
 import "./style.css";
 import * as THREE from "three";
-import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+// import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // Write Javascript code!
 const appDiv = document.getElementById("app");
@@ -16,7 +17,12 @@ const camera = new THREE.PerspectiveCamera(
 );
 camera.position.set(0, 2.5, 2.5);
 camera.lookAt(new THREE.Vector3(0, 0, 0));
+
 const renderer = new THREE.WebGLRenderer();
+
+const controls = new OrbitControls(camera, renderer.domElement);
+// controls.target.set(0, 5, 0);
+// controls.update();
 
 const geometry = new THREE.PlaneGeometry(5, 20, 32);
 const material = new THREE.MeshBasicMaterial({
@@ -24,7 +30,7 @@ const material = new THREE.MeshBasicMaterial({
   side: THREE.DoubleSide
 });
 const plane = new THREE.Mesh(geometry, material);
-plane.rotateX(90);
+plane.rotation.x = Math.PI * -0.5;
 scene.add(plane);
 
 camera.position.z = 5;
@@ -32,26 +38,26 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.body.appendChild(renderer.domElement);
 
 // instantiate a loader
-const loader = new OBJLoader();
+// const loader = new OBJLoader();
 
 // load a resource
-loader.load(
-  // resource URL
-  "assets/chr_sword.obj",
-  // called when resource is loaded
-  function(object) {
-    console.log("success", object);
-    scene.add(object);
-  },
-  // called when loading is in progresses
-  function(xhr) {
-    console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
-  },
-  // called when loading has errors
-  function(error) {
-    console.log("An error happened");
-  }
-);
+// loader.load(
+// // resource URL
+// "assets/chr_sword.obj",
+// called when resource is loaded
+// function(object) {
+//   console.log("success", object);
+//   scene.add(object);
+// }
+// called when loading is in progresses
+// function(xhr) {
+//   console.log((xhr.loaded / xhr.total) * 100 + "% loaded");
+// },
+// called when loading has errors
+// function(error) {
+//   console.log("An error happened");
+// }
+// );
 
 function animate() {
   requestAnimationFrame(animate);
