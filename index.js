@@ -21,7 +21,6 @@ var coronaSafetyDistance = 0.3;
 var velocity = 0.0;
 var speed = 0.0;
 
-
 init();
 animate();
 
@@ -55,9 +54,12 @@ function init() {
   goal.add(camera);
   scene.add(mesh);
 
-  var gridHelper = new THREE.GridHelper(40, 40);
-  scene.add(gridHelper);
+  // var gridHelper = new THREE.GridHelper(40, 40);
+  // scene.add(gridHelper);
 
+  test(scene);
+
+  renderer.setClearColor(0x567ebf);
   renderer.setSize(window.innerWidth, window.innerHeight);
   document.body.appendChild(renderer.domElement);
 
@@ -77,28 +79,41 @@ function init() {
   });
 }
 
+function test(scene) {
+  const geometry = new THREE.PlaneGeometry(40, 40, 40);
+  const material = new THREE.MeshBasicMaterial({
+    color: 0x34c237,
+    side: THREE.DoubleSide
+  });
+  const plane = new THREE.Mesh(geometry, material);
+  plane.rotation.x = -Math.PI / 2;
+  scene.add(plane);
+}
+
 function createPortal(scene) {
+  const zPosition = 0.5;
+  const yPosition = 0.5;
   const portalMaterial = new THREE.MeshBasicMaterial({ color: 0xe0e0e0 });
 
-  const portalSide = new THREE.BoxBufferGeometry(0.3, 1, 0.3);
+  const portalSide = new THREE.BoxBufferGeometry(0.2, 1, 0.2);
   const portalRightSideMesh = new THREE.Mesh(portalSide, portalMaterial);
 
-  portalRightSideMesh.position.z = 0.5;
-  portalRightSideMesh.position.y = 0.5;
+  portalRightSideMesh.position.z = zPosition;
+  portalRightSideMesh.position.y = yPosition;
   scene.add(portalRightSideMesh);
 
   const portalLeftSideMesh = new THREE.Mesh(portalSide, portalMaterial);
-  portalLeftSideMesh.position.z = 0.5;
-  portalLeftSideMesh.position.y = 0.5;
-  portalLeftSideMesh.position.x = 0.7;
+  portalLeftSideMesh.position.z = zPosition;
+  portalLeftSideMesh.position.y = yPosition;
+  portalLeftSideMesh.position.x = zPosition + 0.2;
   scene.add(portalLeftSideMesh);
 
-  const portalTop = new THREE.BoxBufferGeometry(1, 0.3, 0.3);
+  const portalTop = new THREE.BoxBufferGeometry(1, 0.2, 0.2);
 
   const portalTopMesh = new THREE.Mesh(portalTop, portalMaterial);
-  portalTopMesh.position.z = 0.5;
-  portalTopMesh.position.y = 1.1;
-  portalTopMesh.position.x = 0.35;
+  portalTopMesh.position.z = zPosition;
+  portalTopMesh.position.y = yPosition + 0.6;
+  portalTopMesh.position.x = zPosition - 0.15;
   scene.add(portalTopMesh);
 }
 
