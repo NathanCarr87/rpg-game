@@ -5,8 +5,17 @@
 			width: 100%;
 		}
 	</style>
+
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/PhysicsJS/0.7.0/physicsjs-full.min.js"
+		integrity="sha512-D5EcBE6+sYgvwFsmtESBse0QJwJsltlqfpygdm9su02ONbK3KdAHPwVcltXyt+60RP1eoFwUlnhR504/ACV5Yw=="
+		crossorigin="anonymous"></script>
+
 </head>
 
 <body>
+	<script type="text/javascript">
+		Physijs.scripts.worker = '/js/physijs_worker.js';
+	Physijs.scripts.ammo = '/js/ammo.js';
+	</script> 
 	<div id="app"></div>
 </body>
