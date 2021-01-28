@@ -1,10 +1,14 @@
 // Import stylesheets
 import "./style.css";
 import * as THREE from "three";
+import {
+  createRightMesh,
+  createLeftMesh,
+  createTopMesh
+} from "./src/creator/create-portal.js";
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-// author: Fyrestar <info@mevedia.com>
 var camera, scene, renderer, mesh, goal, keys, follow;
 
 var time = 0;
@@ -25,6 +29,8 @@ init();
 animate();
 
 function init() {
+  console.log(new THREE.BoxHelper());
+
   renderer = new THREE.WebGLRenderer({ antialias: true });
 
   camera = new THREE.PerspectiveCamera(
@@ -40,7 +46,16 @@ function init() {
   scene = new THREE.Scene();
   camera.lookAt(scene.position);
 
-  createPortal(scene);
+  // Create Portal Start
+  const zPosition = 1.9;
+  const xPosition = 3.5;
+  const rightMesh = createRightMesh(xPosition, zPosition);
+  const leftMesh = createLeftMesh(xPosition, zPosition);
+  const topMesh = createTopMesh(xPosition, zPosition);
+
+  scene.add(rightMesh);
+  scene.add(leftMesh);
+  scene.add(topMesh);
 
   var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
   var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
@@ -88,33 +103,6 @@ function test(scene) {
   const plane = new THREE.Mesh(geometry, material);
   plane.rotation.x = -Math.PI / 2;
   scene.add(plane);
-}
-
-function createPortal(scene) {
-  const zPosition = 0.5;
-  const yPosition = 0.5;
-  const portalMaterial = new THREE.MeshBasicMaterial({ color: 0xe0e0e0 });
-
-  const portalSide = new THREE.BoxBufferGeometry(0.2, 1, 0.2);
-  const portalRightSideMesh = new THREE.Mesh(portalSide, portalMaterial);
-
-  portalRightSideMesh.position.z = zPosition;
-  portalRightSideMesh.position.y = yPosition;
-  scene.add(portalRightSideMesh);
-
-  const portalLeftSideMesh = new THREE.Mesh(portalSide, portalMaterial);
-  portalLeftSideMesh.position.z = zPosition;
-  portalLeftSideMesh.position.y = yPosition;
-  portalLeftSideMesh.position.x = zPosition + 0.2;
-  scene.add(portalLeftSideMesh);
-
-  const portalTop = new THREE.BoxBufferGeometry(1, 0.2, 0.2);
-
-  const portalTopMesh = new THREE.Mesh(portalTop, portalMaterial);
-  portalTopMesh.position.z = zPosition;
-  portalTopMesh.position.y = yPosition + 0.6;
-  portalTopMesh.position.x = zPosition - 0.15;
-  scene.add(portalTopMesh);
 }
 
 function animate() {
