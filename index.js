@@ -1,23 +1,21 @@
-// Import stylesheets
-import "./style.css";
+// These are ES6 import statements
+// THREE js is the library that creates 3D models in the browser
+// https://threejs.org/
 import * as THREE from "three";
+// These are scripts I import from other files, it is not required but
+// seperating code helps to keep you
 import {
   createRightMesh,
   createLeftMesh,
   createTopMesh
 } from "./src/creator/create-portal.js";
+// These are commented out for now, but I know I need them both in the future
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 // import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+// Variables
 var camera, scene, renderer, mesh, goal, keys, follow;
 
-var time = 0;
-var newPosition = new THREE.Vector3();
-var matrix = new THREE.Matrix4();
-
-var stop = 1;
-var DEGTORAD = 0.01745327;
-var temp = new THREE.Vector3();
 var dir = new THREE.Vector3();
 var a = new THREE.Vector3();
 var b = new THREE.Vector3();
@@ -25,25 +23,38 @@ var coronaSafetyDistance = 0.3;
 var velocity = 0.0;
 var speed = 0.0;
 
+let playerCollisionBox = new THREE.Box3(
+  new THREE.Vector3(),
+  new THREE.Vector3()
+);
+const otherCollisionBoxes = [];
+
+// Calling the functions to run the game
 init();
 animate();
 
 function init() {
-  console.log(new THREE.BoxHelper());
-
+  // Renderer from three js. This will render all the graphics
+  // https://threejs.org/docs/#api/en/renderers/WebGLRenderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
 
+  // Perspective Camera, there are multiple cameras
+  // https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
   camera = new THREE.PerspectiveCamera(
     70,
     window.innerWidth / window.innerHeight,
     0.01,
     10
   );
-  // const controls = new OrbitControls(camera, renderer.domElement);
 
+  // Setting the position far enough behind the player to see the whole scene
   camera.position.set(0, 0.3, -1.5);
 
+  // Scene: the object that holds all the meshes
+  // https://threejs.org/docs/#api/en/scenes/Scene
   scene = new THREE.Scene();
+
+  // aiming the camera
   camera.lookAt(scene.position);
 
   // Create Portal Start
@@ -53,26 +64,33 @@ function init() {
   const leftMesh = createLeftMesh(xPosition, zPosition);
   const topMesh = createTopMesh(xPosition, zPosition);
 
+  const rightMeshBBox = new THREE.Box3(
+    new THREE.Vector3(),
+    new THREE.Vector3()
+  );
+  rightMeshBBox.setFromObject(rightMesh);
+  otherCollisionBoxes.push(rightMeshBBox);
+
   scene.add(rightMesh);
   scene.add(leftMesh);
   scene.add(topMesh);
 
+  // This is the player geometry
+  // Will eventually be replaced by a loaded 3D model
   var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
   var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
 
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 0.1;
+  playerCollisionBox.setFromObject(mesh);
+  scene.add(mesh);
 
   goal = new THREE.Object3D();
   follow = new THREE.Object3D();
   goal.position.z = -coronaSafetyDistance;
   goal.add(camera);
-  scene.add(mesh);
 
-  // var gridHelper = new THREE.GridHelper(40, 40);
-  // scene.add(gridHelper);
-
-  test(scene);
+  createPlane(scene);
 
   renderer.setClearColor(0x567ebf);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -94,7 +112,7 @@ function init() {
   });
 }
 
-function test(scene) {
+function createPlane(scene) {
   const geometry = new THREE.PlaneGeometry(40, 40, 40);
   const material = new THREE.MeshBasicMaterial({
     color: 0x34c237,
@@ -128,9 +146,13 @@ function animate() {
     .normalize();
   const dis = a.distanceTo(b) - coronaSafetyDistance;
   goal.position.addScaledVector(dir, dis);
-  //temp.setFromMatrixPosition(goal.matrixWorld);
 
-  //camera.position.lerp(temp, 0.2);
+  otherCollisionBoxes.forEach(collisionBox => {
+    if (playerCollisionBox.intersectsBox(collisionBox)) {
+      console.log("HITa");
+    }
+  });
+
   camera.lookAt(mesh.position);
 
   renderer.render(scene, camera);
