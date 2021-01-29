@@ -23,11 +23,12 @@ var coronaSafetyDistance = 0.3;
 var velocity = 0.0;
 var speed = 0.0;
 
-let playerCollisionBox = new THREE.Box3(
-  new THREE.Vector3(),
-  new THREE.Vector3()
-);
+// An array to put meshes in so we can check for collisions later
 const otherCollisionBoxes = [];
+const treasureCollisionBoxes = [];
+const planeWidth = 15;
+const planeDepth = 15;
+const COLLECTABLE = "COLLECTABLE";
 
 // Calling the functions to run the game
 init();
@@ -57,6 +58,9 @@ function init() {
   // aiming the camera
   camera.lookAt(scene.position);
 
+  createPlane(scene);
+  createPlayer();
+
   // Create Portal Start
   const zPosition = 1.9;
   const xPosition = 3.5;
@@ -64,33 +68,18 @@ function init() {
   const leftMesh = createLeftMesh(xPosition, zPosition);
   const topMesh = createTopMesh(xPosition, zPosition);
 
-  const rightMeshBBox = new THREE.Box3(
-    new THREE.Vector3(),
-    new THREE.Vector3()
-  );
-  rightMeshBBox.setFromObject(rightMesh);
-  otherCollisionBoxes.push(rightMeshBBox);
+  // only adding the right and left sides to the collition check... no flying!
+  otherCollisionBoxes.push(rightMesh);
+  otherCollisionBoxes.push(leftMesh);
 
   scene.add(rightMesh);
   scene.add(leftMesh);
   scene.add(topMesh);
 
-  // This is the player geometry
-  // Will eventually be replaced by a loaded 3D model
-  var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-  var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
-
-  mesh = new THREE.Mesh(geometry, material);
-  mesh.position.y = 0.1;
-  playerCollisionBox.setFromObject(mesh);
-  scene.add(mesh);
-
   goal = new THREE.Object3D();
   follow = new THREE.Object3D();
   goal.position.z = -coronaSafetyDistance;
   goal.add(camera);
-
-  createPlane(scene);
 
   renderer.setClearColor(0x567ebf);
   renderer.setSize(window.innerWidth, window.innerHeight);
@@ -112,8 +101,42 @@ function init() {
   });
 }
 
+function createPlayer() {
+  // This is the player geometry
+  // Will eventually be replaced by a loaded 3D model
+  var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
+  var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+
+  mesh = new THREE.Mesh(geometry, material);
+  mesh.position.y = 0.1;
+  mesh.name = "PLAYER";
+  scene.add(mesh);
+}
+
+function spawnRandomTreasure() {
+  setTimeout(function() {
+    createTreasure();
+  }, 3000);
+}
+
+function createTreasure() {
+  // This is the treasure geometry
+  // Will eventually be replaced by a loaded 3D model
+  var geometry = new THREE.BoxBufferGeometry(0.1, 0.1, 0.01);
+  var material = new THREE.MeshBasicMaterial({ color: 0xffff00 });
+
+  let treasureMesh = new THREE.Mesh(geometry, material);
+  treasureMesh.position.y = 0.2;
+  treasureMesh.position.z = 1.2;
+  treasureMesh.rotation.z = -Math.PI / 4;
+  treasureMesh.name = COLLECTABLE;
+  // console.log(treasureMesh);
+  treasureCollisionBoxes.push(treasureMesh);
+  scene.add(treasureMesh);
+}
+
 function createPlane(scene) {
-  const geometry = new THREE.PlaneGeometry(40, 40, 40);
+  const geometry = new THREE.PlaneGeometry(planeWidth, planeDepth, 40);
   const material = new THREE.MeshBasicMaterial({
     color: 0x34c237,
     side: THREE.DoubleSide
@@ -125,6 +148,11 @@ function createPlane(scene) {
 
 function animate() {
   requestAnimationFrame(animate);
+  let playerCollisionBox = new THREE.Box3(
+    new THREE.Vector3(),
+    new THREE.Vector3()
+  );
+  playerCollisionBox.setFromObject(mesh);
 
   speed = 0.0;
 
@@ -132,6 +160,36 @@ function animate() {
   else if (keys.s) speed = -0.02;
 
   velocity += (speed - velocity) * 0.3;
+  otherCollisionBoxes.forEach(meshBox => {
+    const collisionBox = new THREE.Box3(
+      new THREE.Vector3(),
+      new THREE.Vector3()
+    );
+    collisionBox.setFromObject(meshBox);
+    if (playerCollisionBox.intersectsBox(collisionBox)) {
+      velocity = -1 * velocity;
+    }
+  });
+
+  if (treasureCollisionBoxes.length > 0) {
+    treasureCollisionBoxes.forEach(treasureMeshBox => {
+      const treasureCollisionBox = new THREE.Box3(
+        new THREE.Vector3(),
+        new THREE.Vector3()
+      );
+      treasureCollisionBox.setFromObject(treasureMeshBox);
+      if (playerCollisionBox.intersectsBox(treasureCollisionBox)) {
+        const removeMesh = scene.getObjectByProperty(
+          "uuid",
+          treasureMeshBox.uuid
+        );
+        treasureCollisionBoxes.pop();
+        removeMesh.geometry.dispose();
+        removeMesh.material.dispose();
+        scene.remove(removeMesh);
+      }
+    });
+  }
   mesh.translateZ(velocity);
 
   if (keys.a) mesh.rotateY(0.05);
@@ -146,12 +204,6 @@ function animate() {
     .normalize();
   const dis = a.distanceTo(b) - coronaSafetyDistance;
   goal.position.addScaledVector(dir, dis);
-
-  otherCollisionBoxes.forEach(collisionBox => {
-    if (playerCollisionBox.intersectsBox(collisionBox)) {
-      console.log("HITa");
-    }
-  });
 
   camera.lookAt(mesh.position);
 
