@@ -29,6 +29,7 @@ const treasureCollisionBoxes = [];
 const planeWidth = 15;
 const planeDepth = 15;
 const COLLECTABLE = "COLLECTABLE";
+let score = 0;
 
 // Calling the functions to run the game
 init();
@@ -47,6 +48,8 @@ function init() {
     0.01,
     10
   );
+
+  document.getElementById("score").innerText = score;
 
   // Setting the position far enough behind the player to see the whole scene
   camera.position.set(0, 0.3, -1.5);
@@ -71,7 +74,7 @@ function init() {
   // only adding the right and left sides to the collition check... no flying!
   otherCollisionBoxes.push(rightMesh);
   otherCollisionBoxes.push(leftMesh);
-
+  spawnRandomTreasure();
   scene.add(rightMesh);
   scene.add(leftMesh);
   scene.add(topMesh);
@@ -127,7 +130,8 @@ function createTreasure() {
 
   let treasureMesh = new THREE.Mesh(geometry, material);
   treasureMesh.position.y = 0.2;
-  treasureMesh.position.z = 1.2;
+  treasureMesh.position.z = Math.random() * 5 + 0.1;
+  treasureMesh.position.x = Math.random() * 5 + 0.1;
   treasureMesh.rotation.z = -Math.PI / 4;
   treasureMesh.name = COLLECTABLE;
   // console.log(treasureMesh);
@@ -187,6 +191,9 @@ function animate() {
         removeMesh.geometry.dispose();
         removeMesh.material.dispose();
         scene.remove(removeMesh);
+        spawnRandomTreasure();
+        score += 1;
+        document.getElementById("score").innerText = score;
       }
     });
   }
