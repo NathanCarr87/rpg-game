@@ -11,7 +11,7 @@ import {
 } from "./src/creator/create-portal.js";
 // These are commented out for now, but I know I need them both in the future
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-// import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
 // Variables
 var camera, scene, renderer, mesh, goal, keys, follow;
@@ -30,6 +30,12 @@ const planeWidth = 15;
 const planeDepth = 15;
 const COLLECTABLE = "COLLECTABLE";
 let score = 0;
+let controls;
+
+const player = {
+  currentHeath: 100,
+  maxHealth: 100
+};
 
 // Calling the functions to run the game
 init();
@@ -50,6 +56,9 @@ function init() {
   );
 
   document.getElementById("score").innerText = score;
+  document.getElementById("character-health").innerText = `HP: ${
+    player.currentHeath
+  }/ ${player.maxHealth}`;
 
   // Setting the position far enough behind the player to see the whole scene
   camera.position.set(0, 0.3, -1.5);
@@ -63,6 +72,13 @@ function init() {
 
   createPlane(scene);
   createPlayer();
+  controls = new OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.minDistance = 1.0;
+  controls.maxDistance = 2.0;
+  controls.enablePan = false;
+  controls.rotateSpeed = 0.5;
+  controls.enableDamping = true;
 
   // Create Portal Start
   const zPosition = 1.9;
@@ -108,12 +124,24 @@ function createPlayer() {
   // This is the player geometry
   // Will eventually be replaced by a loaded 3D model
   var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-  var material = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  var material = new THREE.MeshBasicMaterial({ color: 0xe8831e });
 
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 0.1;
   mesh.name = "PLAYER";
   scene.add(mesh);
+}
+
+function createEnemyCube() {
+  // This is the player geometry
+  // Will eventually be replaced by a loaded 3D model
+  var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
+  var material = new THREE.MeshBasicMaterial({ color: 0xe8831e });
+
+  enemyMesh = new THREE.Mesh(geometry, material);
+  enemyMesh.position.y = 0.7;
+  enemyMesh.name = "Enemy";
+  scene.add(enemyMesh);
 }
 
 function spawnRandomTreasure() {
@@ -213,6 +241,7 @@ function animate() {
   goal.position.addScaledVector(dir, dis);
 
   camera.lookAt(mesh.position);
+  controls.update();
 
   renderer.render(scene, camera);
 }
