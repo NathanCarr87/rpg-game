@@ -26,9 +26,11 @@ var speed = 0.0;
 // An array to put meshes in so we can check for collisions later
 const otherCollisionBoxes = [];
 const treasureCollisionBoxes = [];
+const enemyCollisionBoxes = [];
 const planeWidth = 15;
 const planeDepth = 15;
 const COLLECTABLE = "COLLECTABLE";
+const ENEMY = "ENEMY";
 let score = 0;
 let controls;
 
@@ -72,6 +74,7 @@ function init() {
 
   createPlane(scene);
   createPlayer();
+  createEnemyCube();
   controls = new OrbitControls(camera, renderer.domElement);
   controls.enableDamping = true;
   controls.minDistance = 1.0;
@@ -136,11 +139,14 @@ function createEnemyCube() {
   // This is the player geometry
   // Will eventually be replaced by a loaded 3D model
   var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
-  var material = new THREE.MeshBasicMaterial({ color: 0xe8831e });
+  var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
 
-  enemyMesh = new THREE.Mesh(geometry, material);
-  enemyMesh.position.y = 0.7;
-  enemyMesh.name = "Enemy";
+  const enemyMesh = new THREE.Mesh(geometry, material);
+  enemyMesh.position.y = 0.1;
+  enemyMesh.position.z = 0.7;
+  enemyMesh.position.x = 0.7;
+  enemyMesh.name = ENEMY;
+  enemyCollisionBoxes.push(enemyMesh);
   scene.add(enemyMesh);
 }
 
@@ -201,6 +207,25 @@ function animate() {
     if (playerCollisionBox.intersectsBox(collisionBox)) {
       velocity = -1 * velocity;
     }
+  });
+
+  enemyCollisionBoxes.forEach(enemyMeshBox => {
+    const detectionBox = new THREE.Box3(
+      new THREE.Vector3(),
+      new THREE.Vector3()
+    );
+    detectionBox.setFromObject(enemyMeshBox);
+    detectionBox.expandByVector(new THREE.Vector3(1, 0, 1));
+    const helper = new THREE.Box3Helper(detectionBox, 0xffff00);
+    // scene.add(helper);
+
+    const collisionBox = new THREE.Box3(
+      new THREE.Vector3(),
+      new THREE.Vector3()
+    );
+    collisionBox.setFromObject(enemyMeshBox);
+    const helper2 = new THREE.Box3Helper(collisionBox, 0xff00ff);
+    // scene.add(helper2);
   });
 
   if (treasureCollisionBoxes.length > 0) {
