@@ -9,6 +9,7 @@ import {
   createLeftMesh,
   createTopMesh
 } from "./src/creator/create-portal.js";
+import { createPlane } from "./src/creator/create-plane.js";
 // These are commented out for now, but I know I need them both in the future
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
@@ -27,8 +28,7 @@ var speed = 0.0;
 const otherCollisionBoxes = [];
 const treasureCollisionBoxes = [];
 const enemyCollisionBoxes = [];
-const planeWidth = 15;
-const planeDepth = 15;
+let plane;
 const COLLECTABLE = "COLLECTABLE";
 const ENEMY = "ENEMY";
 let score = 0;
@@ -39,6 +39,9 @@ const player = {
   maxHealth: 100
 };
 
+const raycaster = new THREE.Raycaster();
+let mouse = new THREE.Vector2();
+
 // Calling the functions to run the game
 init();
 animate();
@@ -47,6 +50,7 @@ function init() {
   // Renderer from three js. This will render all the graphics
   // https://threejs.org/docs/#api/en/renderers/WebGLRenderer
   renderer = new THREE.WebGLRenderer({ antialias: true });
+  // window.addEventListener("click", onMouseClick, false);
 
   // Perspective Camera, there are multiple cameras
   // https://threejs.org/docs/#api/en/cameras/PerspectiveCamera
@@ -72,7 +76,11 @@ function init() {
   // aiming the camera
   camera.lookAt(scene.position);
 
-  createPlane(scene);
+  // Adding a plane | START
+  plane = createPlane();
+  scene.add(plane);
+  // | END
+
   createPlayer();
   createEnemyCube();
   controls = new OrbitControls(camera, renderer.domElement);
@@ -83,12 +91,13 @@ function init() {
   controls.rotateSpeed = 0.5;
   controls.enableDamping = true;
 
-  // Create Portal Start
+  // Create Portal | START
   const zPosition = 1.9;
   const xPosition = 3.5;
   const rightMesh = createRightMesh(xPosition, zPosition);
   const leftMesh = createLeftMesh(xPosition, zPosition);
   const topMesh = createTopMesh(xPosition, zPosition);
+  // | END
 
   // only adding the right and left sides to the collition check... no flying!
   otherCollisionBoxes.push(rightMesh);
@@ -123,6 +132,14 @@ function init() {
   });
 }
 
+function onMouseClick(event) {
+  // calculate mouse position in normalized device coordinates
+  // (-1 to +1) for both components
+
+  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+}
+
 function createPlayer() {
   // This is the player geometry
   // Will eventually be replaced by a loaded 3D model
@@ -132,11 +149,12 @@ function createPlayer() {
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 0.1;
   mesh.name = "PLAYER";
+  mesh.castShadow = true;
   scene.add(mesh);
 }
 
 function createEnemyCube() {
-  // This is the player geometry
+  // This is the enemy geometry
   // Will eventually be replaced by a loaded 3D model
   var geometry = new THREE.BoxBufferGeometry(0.2, 0.2, 0.2);
   var material = new THREE.MeshBasicMaterial({ color: 0xff0000 });
@@ -173,17 +191,6 @@ function createTreasure() {
   scene.add(treasureMesh);
 }
 
-function createPlane(scene) {
-  const geometry = new THREE.PlaneGeometry(planeWidth, planeDepth, 40);
-  const material = new THREE.MeshBasicMaterial({
-    color: 0x34c237,
-    side: THREE.DoubleSide
-  });
-  const plane = new THREE.Mesh(geometry, material);
-  plane.rotation.x = -Math.PI / 2;
-  scene.add(plane);
-}
-
 function animate() {
   requestAnimationFrame(animate);
   let playerCollisionBox = new THREE.Box3(
@@ -191,6 +198,26 @@ function animate() {
     new THREE.Vector3()
   );
   playerCollisionBox.setFromObject(mesh);
+
+  let clickToPosition;
+  // Raycasting for click to move and mobile move | START
+  // if (mouse.x !== 0 || mouse.y !== 0) {
+  //   raycaster.setFromCamera(mouse, camera);
+  //   const intersects = raycaster.intersectObject(plane);
+
+  //   intersects.forEach(intersect => {
+  //     console.log("treasure!", intersect);
+  //     mesh.lookAt(intersect.point.x, 0.1, intersect.point.z);
+  //     goal.lookAt(intersect.point.x, 0.1, intersect.point.z);
+  //     mouse = new THREE.Vector2();
+  //     clickToPosition = new THREE.Vector3(
+  //       intersect.point.x,
+  //       intersect.point.y,
+  //       intersect.point.z
+  //     );
+  //   });
+  // }
+  // | END
 
   speed = 0.0;
 
@@ -217,7 +244,7 @@ function animate() {
     detectionBox.setFromObject(enemyMeshBox);
     detectionBox.expandByVector(new THREE.Vector3(1, 0, 1));
     const helper = new THREE.Box3Helper(detectionBox, 0xffff00);
-    // scene.add(helper);
+    scene.add(helper);
 
     const collisionBox = new THREE.Box3(
       new THREE.Vector3(),
@@ -251,10 +278,18 @@ function animate() {
     });
   }
   mesh.translateZ(velocity);
+  // if (clickToPosition) {
+  //   mesh.translateOnAxis(clickToPosition, velocity);
+  //   clickToPosition = undefined;
+  // }
 
-  if (keys.a) mesh.rotateY(0.05);
-  else if (keys.d) mesh.rotateY(-0.05);
-
+  if (keys.a) {
+    mesh.rotateY(0.05);
+    // goal.rotateY(0.05);
+  } else if (keys.d) {
+    mesh.rotateY(-0.05);
+    // goal.rotateY(-0.05);
+  }
   a.lerp(mesh.position, 0.4);
   b.copy(goal.position);
 
