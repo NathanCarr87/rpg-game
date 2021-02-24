@@ -13,6 +13,34 @@ import { createPlane } from "./src/creator/create-plane.js";
 // These are commented out for now, but I know I need them both in the future
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
+// Firebase App (the core Firebase SDK) is always required and must be listed first
+import firebase from "firebase/app";
+// If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
+// import * as firebase from "firebase/app"
+
+// If you enabled Analytics in your project, add the Firebase SDK for Analytics
+import "firebase/analytics";
+
+// Add the Firebase products that you want to use
+import "firebase/auth";
+import "firebase/firestore";
+
+import { Observable } from "rxjs";
+
+// TODO: Replace the following with your app's Firebase project configuration
+// For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
+const firebaseConfig = {
+  apiKey: "AIzaSyBqhJLqr2yPE3BHh3GyVm1IP2grDa-UWxk",
+  authDomain: "lets-learn-ceb1f.firebaseapp.com",
+  projectId: "lets-learn-ceb1f",
+  storageBucket: "lets-learn-ceb1f.appspot.com",
+  messagingSenderId: "196771154148",
+  appId: "1:196771154148:web:2dc51da0e3362298b184f1",
+  measurementId: "G-YQXZJQ9F0E"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 
 // Variables
 var camera, scene, renderer, mesh, goal, keys, follow;

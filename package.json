@@ -3,6 +3,8 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
+    "firebase": "^8.2.9",
+    "rxjs": "^6.6.3",
     "three": "^0.125.1"
   }
 }
