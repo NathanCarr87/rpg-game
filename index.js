@@ -1,46 +1,21 @@
 // These are ES6 import statements
 // THREE js is the library that creates 3D models in the browser
 // https://threejs.org/
-import * as THREE from "three";
+import * as THREE from 'three';
 // These are scripts I import from other files, it is not required but
 // seperating code helps to keep you
 import {
   createRightMesh,
   createLeftMesh,
   createTopMesh
-} from "./src/creator/create-portal.js";
-import { createPlane } from "./src/creator/create-plane.js";
+} from './src/creator/create-portal.js';
+import { createPlane } from './src/creator/create-plane.js';
 // These are commented out for now, but I know I need them both in the future
 // import { OBJLoader } from "three/examples/jsm/loaders/OBJLoader.js";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-// Firebase App (the core Firebase SDK) is always required and must be listed first
-import firebase from "firebase/app";
-// If you are using v7 or any earlier version of the JS SDK, you should import firebase using namespace import
-// import * as firebase from "firebase/app"
-
-// If you enabled Analytics in your project, add the Firebase SDK for Analytics
-import "firebase/analytics";
-
-// Add the Firebase products that you want to use
-import "firebase/auth";
-import "firebase/firestore";
-
-import { Observable } from "rxjs";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 // TODO: Replace the following with your app's Firebase project configuration
 // For Firebase JavaScript SDK v7.20.0 and later, `measurementId` is an optional field
-const firebaseConfig = {
-  apiKey: "AIzaSyBqhJLqr2yPE3BHh3GyVm1IP2grDa-UWxk",
-  authDomain: "lets-learn-ceb1f.firebaseapp.com",
-  projectId: "lets-learn-ceb1f",
-  storageBucket: "lets-learn-ceb1f.appspot.com",
-  messagingSenderId: "196771154148",
-  appId: "1:196771154148:web:2dc51da0e3362298b184f1",
-  measurementId: "G-YQXZJQ9F0E"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
 
 // Variables
 var camera, scene, renderer, mesh, goal, keys, follow;
@@ -57,8 +32,8 @@ const otherCollisionBoxes = [];
 const treasureCollisionBoxes = [];
 const enemyCollisionBoxes = [];
 let plane;
-const COLLECTABLE = "COLLECTABLE";
-const ENEMY = "ENEMY";
+const COLLECTABLE = 'COLLECTABLE';
+const ENEMY = 'ENEMY';
 let score = 0;
 let controls;
 
@@ -89,8 +64,8 @@ function init() {
     10
   );
 
-  document.getElementById("score").innerText = score;
-  document.getElementById("character-health").innerText = `HP: ${
+  document.getElementById('score').innerText = score;
+  document.getElementById('character-health').innerText = `HP: ${
     player.currentHeath
   }/ ${player.maxHealth}`;
 
@@ -150,12 +125,12 @@ function init() {
     d: false,
     w: false
   };
-  document.body.addEventListener("keydown", function(e) {
-    var key = e.code.replace("Key", "").toLowerCase();
+  document.body.addEventListener('keydown', function(e) {
+    var key = e.code.replace('Key', '').toLowerCase();
     if (keys[key] !== undefined) keys[key] = true;
   });
-  document.body.addEventListener("keyup", function(e) {
-    var key = e.code.replace("Key", "").toLowerCase();
+  document.body.addEventListener('keyup', function(e) {
+    var key = e.code.replace('Key', '').toLowerCase();
     if (keys[key] !== undefined) keys[key] = false;
   });
 }
@@ -176,7 +151,7 @@ function createPlayer() {
 
   mesh = new THREE.Mesh(geometry, material);
   mesh.position.y = 0.1;
-  mesh.name = "PLAYER";
+  mesh.name = 'PLAYER';
   mesh.castShadow = true;
   scene.add(mesh);
 }
@@ -292,7 +267,7 @@ function animate() {
       treasureCollisionBox.setFromObject(treasureMeshBox);
       if (playerCollisionBox.intersectsBox(treasureCollisionBox)) {
         const removeMesh = scene.getObjectByProperty(
-          "uuid",
+          'uuid',
           treasureMeshBox.uuid
         );
         treasureCollisionBoxes.pop();
@@ -301,7 +276,7 @@ function animate() {
         scene.remove(removeMesh);
         spawnRandomTreasure();
         score += 1;
-        document.getElementById("score").innerText = score;
+        document.getElementById('score').innerText = score;
       }
     });
   }
